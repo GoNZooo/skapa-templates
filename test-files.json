@@ -1,0 +1,28 @@
+{
+  "id": "test-files",
+  "entities": [
+    {
+      "type": "directory",
+      "path": "${kebabProjectName}",
+      "children": [
+        {
+          "type": "directory",
+          "path": "${kebabProjectName}/${moduleProjectName}",
+          "children": [
+            {
+              "type": "file",
+              "path": "${kebabProjectName}/${moduleProjectName}/OtherFile.purs",
+              "content": "module ${moduleProjectName}.OtherFile where\n\nhello :: String\nhello = \"Hello from the other fiiiiiile: ${kebabProjectName}\"\n"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "path": "${kebabProjectName}/${moduleProjectName}.purs",
+          "content": "module ${moduleProjectName} where\n\nimport ${moduleProjectName}.OtherFile as OtherFile\n\nhello :: String\nhello = \"This is the ${moduleProjectName} project!\"\n\nusesKebabCase :: String\nusesKebabCase = \"This is the ${kebabProjectName} project!\"\n\nhelloFromOtherFile :: String\nhelloFromOtherFile = OtherFile.hello\n"
+        }
+      ]
+    }
+  ],
+  "description": "Test files that show basic synthesizing and generation"
+}

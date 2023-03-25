@@ -13,8 +13,13 @@
       "children": [
         {
           "type": "file",
+          "path": "${kebab}/.gitignore",
+          "content": ".spago\n.psc-ide-port\ndeps\nebin\noutput\n.elixir_ls\n_build\n"
+        },
+        {
+          "type": "file",
           "path": "${kebab}/.skapareignore",
-          "content": ".spago\noutput\ndeps\n.elixir_ls\n.psc-ide-port\nebin\n_build\n.git\n"
+          "content": ".spago$\noutput$\ndeps$\n.elixir_ls$\n.psc-ide-port$\nebin$\n_build$\n.git$\n"
         },
         {
           "type": "file",
@@ -22,9 +27,9 @@
           "content": "purescript 0.15.7\nspago 0.20.9\npurerl 0.0.19\n"
         },
         {
-          "type": "directory",
-          "path": "${kebab}/lib",
-          "children": []
+          "type": "file",
+          "path": "${kebab}/README.md",
+          "content": "# ${kebab}\n\nA description of the project.\n\nMade with [`purerl`](https://github.com/purerl/purerl).\n"
         },
         {
           "type": "file",
@@ -50,22 +55,6 @@
           "type": "directory",
           "path": "${kebab}/src",
           "children": [
-            {
-              "type": "directory",
-              "path": "${kebab}/src/${pascal}",
-              "children": [
-                {
-                  "type": "file",
-                  "path": "${kebab}/src/${pascal}/Application.purs",
-                  "content": "module ${pascal}.Application where\n\nimport ${pascal}.Supervisor as ${pascal}Supervisor\nimport Effect.Uncurried (EffectFn2)\nimport Erl.Atom (Atom)\nimport Erl.Data.List as ErlList\nimport Foreign (Foreign)\nimport Pinto.App as Application\n\nstart :: forall args. EffectFn2 Atom (ErlList.List args) Foreign\nstart = Application.simpleStart ${pascal}Supervisor.startLink\n"
-                },
-                {
-                  "type": "file",
-                  "path": "${kebab}/src/${pascal}/Supervisor.purs",
-                  "content": "module ${pascal}.Supervisor\n  ( startLink\n  ) where\n\nimport Prelude\n\nimport Data.Maybe (Maybe(..))\nimport Data.Time.Duration (Seconds(..))\nimport Effect (Effect)\nimport Erl.Atom (atom)\nimport Erl.Data.List as ErlList\nimport Pinto.Supervisor (SupervisorPid)\nimport Pinto.Supervisor as Supervisor\nimport Pinto.Supervisor.Helpers as SupervisorHelpers\nimport Pinto.Types (RegistryName(..), StartLinkResult)\n\nstartLink :: Effect (StartLinkResult SupervisorPid)\nstartLink = Supervisor.startLink (Just $ Local $ atom supervisorName) $ pure supervisorSpec\n  where\n  supervisorSpec = { childSpecs, flags }\n  supervisorName = \"${pascal}.Supervisor\"\n  childSpecs = ErlList.fromFoldable []\n  flags = { strategy, intensity, period }\n  strategy = Supervisor.OneForOne\n  intensity = 3\n  period = Seconds 5.0\n\n"
-                }
-              ]
-            },
             {
               "type": "directory",
               "path": "${kebab}/src/Pinto",
@@ -98,6 +87,22 @@
                   ]
                 }
               ]
+            },
+            {
+              "type": "directory",
+              "path": "${kebab}/src/${pascal}",
+              "children": [
+                {
+                  "type": "file",
+                  "path": "${kebab}/src/${pascal}/Application.purs",
+                  "content": "module ${pascal}.Application where\n\nimport ${pascal}.Supervisor as ${pascal}Supervisor\nimport Effect.Uncurried (EffectFn2)\nimport Erl.Atom (Atom)\nimport Erl.Data.List as ErlList\nimport Foreign (Foreign)\nimport Pinto.App as Application\n\nstart :: forall args. EffectFn2 Atom (ErlList.List args) Foreign\nstart = Application.simpleStart ${pascal}Supervisor.startLink\n"
+                },
+                {
+                  "type": "file",
+                  "path": "${kebab}/src/${pascal}/Supervisor.purs",
+                  "content": "module ${pascal}.Supervisor\n  ( startLink\n  ) where\n\nimport Prelude\n\nimport Data.Maybe (Maybe(..))\nimport Data.Time.Duration (Seconds(..))\nimport Effect (Effect)\nimport Erl.Atom (atom)\nimport Erl.Data.List as ErlList\nimport Pinto.Supervisor (SupervisorPid)\nimport Pinto.Supervisor as Supervisor\nimport Pinto.Types (RegistryName(..), StartLinkResult)\n\nstartLink :: Effect (StartLinkResult SupervisorPid)\nstartLink = Supervisor.startLink (Just $ Local $ atom supervisorName) $ pure supervisorSpec\n  where\n  supervisorSpec = { childSpecs, flags }\n  supervisorName = \"${pascal}.Supervisor\"\n  childSpecs = ErlList.fromFoldable []\n  flags = { strategy, intensity, period }\n  strategy = Supervisor.OneForOne\n  intensity = 3\n  period = Seconds 5.0\n\n"
+                }
+              ]
             }
           ]
         },
@@ -125,5 +130,5 @@
       ]
     }
   ],
-  "description": "Basic Purerl Elixir template"
+  "description": "A basic PureScript (purerl) application template"
 }

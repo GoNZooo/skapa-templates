@@ -1,0 +1,38 @@
+{
+  "variables": [
+    "module",
+    "path",
+    "server"
+  ],
+  "id": "sofo",
+  "entities": [
+    {
+      "type": "directory",
+      "path": "${path}",
+      "children": [
+        {
+          "type": "directory",
+          "path": "${path}/${server}",
+          "children": [
+            {
+              "type": "file",
+              "path": "${path}/${server}/Supervisor.purs",
+              "content": "module ${module}.Supervisor\n  ( startLink\n  , startChild\n  ) where\n\nimport Prelude\n\nimport Data.Maybe (Maybe(..))\nimport Data.Time.Duration (Milliseconds(..), Seconds(..))\nimport Effect (Effect)\nimport Erl.Atom as Atom\nimport Pinto (RegistryName(..), RegistryReference(..), StartLinkResult)\nimport Pinto.Supervisor\n  ( ChildShutdownTimeoutStrategy(..)\n  , ChildType(..)\n  , RestartStrategy(..)\n  , crashIfChildNotRunning\n  )\nimport Pinto.Supervisor.SimpleOneForOne as Supervisor\nimport ${module} as ${server}\nimport ${module}.Types as ${server}Types\n\ntype SupervisorType = Supervisor.SupervisorType ${server}Types.Arguments ${server}Types.Pid\ntype Pid = Supervisor.SupervisorPid ${server}Types.Arguments ${server}Types.Pid\n\nname :: RegistryName SupervisorType\nname = \"${module}.Supervisor\" # Atom.atom # Local\n\nstartLink :: Effect (StartLinkResult Pid)\nstartLink = do\n  let\n    childType = Worker\n    intensity = 5\n    period = Seconds 10.0\n    restartStrategy = RestartTransient\n    start = ${server}.startLink\n    shutdownStrategy = 5000.0 # Milliseconds # ShutdownTimeout\n    init = pure { childType, intensity, period, restartStrategy, start, shutdownStrategy }\n  Supervisor.startLink (Just name) init\n\nstartChild :: ${server}Types.Arguments -> Effect ${server}Types.Pid\nstartChild arguments = do\n  crashIfChildNotRunning <$> Supervisor.startChild (ByName name) arguments\n"
+            },
+            {
+              "type": "file",
+              "path": "${path}/${server}/Types.purs",
+              "content": "module ${module}.Types\n  ( Message(..)\n  , ServerType'\n  , Pid\n  , State\n  , Arguments\n  ) where\n\nimport Prelude\n\nimport Pinto.GenServer (ServerPid, ServerType)\n\ndata Message = NoOp\n\ntype State = { count :: Int }\n\ntype Arguments = { name :: String, initialCount :: Int }\n\ntype ServerType' = ServerType Unit Unit Message State\ntype Pid = ServerPid Unit Unit Message State\n"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "path": "${path}/${server}.purs",
+          "content": "module ${module}\n  ( startLink\n  , increment\n  , currentCount\n  ) where\n\nimport Prelude\n\nimport Data.Maybe (Maybe(..))\nimport Effect (Effect)\nimport Erl.Atom as Atom\nimport Erl.Data.Tuple (tuple2)\nimport Foreign as Foreign\nimport Pinto (RegistryName(..), RegistryReference(..), StartLinkResult)\nimport Pinto.GenServer (CallFn, CastFn, InfoFn, InitFn, InitResult(..), ServerSpec)\nimport Pinto.GenServer as GenServer\nimport ${module}.Types (Arguments, Message(..), ServerType', State, Pid)\n\nserverName :: String -> RegistryName ServerType'\nserverName name =\n  name # tuple2 (Atom.atom \"${module}\") # Foreign.unsafeToForeign # Global\n\nstartLink :: Arguments -> Effect (StartLinkResult Pid)\nstartLink arguments = do\n  arguments # spec # GenServer.startLink\n\nspec :: Arguments -> ServerSpec Unit Unit Message State\nspec arguments = do\n  let name = serverName arguments.name\n  (arguments # init # GenServer.defaultSpec) { name = Just name, handleInfo = Just handleInfo }\n\ninit :: Arguments -> InitFn Unit Unit Message State\ninit { initialCount } = { count: initialCount } # InitOk # pure\n\nincrement :: String -> Effect Unit\nincrement name = GenServer.cast (name # serverName # ByName) handleIncrement\n\ncurrentCount :: String -> Effect Int\ncurrentCount name = GenServer.call (name # serverName # ByName) handleCurrentCount\n\nhandleIncrement :: CastFn Unit Unit Message State\nhandleIncrement state = do\n  state { count = state.count + 1 } # GenServer.return # pure\n\nhandleCurrentCount :: CallFn Int Unit Unit Message State\nhandleCurrentCount _from state = do\n  state # GenServer.reply state.count # pure\n\nhandleInfo :: InfoFn Unit Unit Message State\nhandleInfo NoOp state = state # GenServer.return # pure\n"
+        }
+      ]
+    }
+  ],
+  "description": "A basic SimpleOneForOne server & supervisor"
+}

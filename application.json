@@ -66,22 +66,6 @@
                 },
                 {
                   "type": "directory",
-                  "path": "${projectName}/src/${moduleName}/GenServer",
-                  "children": [
-                    {
-                      "type": "file",
-                      "path": "${projectName}/src/${moduleName}/GenServer/Helpers.erl",
-                      "content": "-module(${camelizedName}_genServer_helpers@foreign).\n\n-export([exit_/2]).\n\nexit_(Name0, Reason) ->\n  Name = translate_name(Name0),\n  fun() -> gen_server:stop(Name, Reason, timer:seconds(5)) end.\n\ntranslate_name({local, Name}) ->\n  Name;\ntranslate_name(Name) ->\n  Name.\n"
-                    },
-                    {
-                      "type": "file",
-                      "path": "${projectName}/src/${moduleName}/GenServer/Helpers.purs",
-                      "content": "module ${moduleName}.GenServer.Helpers\n  ( exit\n  ) where\n\nimport Prelude\n\nimport Effect (Effect)\nimport Erl.Atom (Atom)\nimport Erl.Process (Process)\n\nexit :: forall process. Process process -> Atom -> Effect Unit\nexit = exit_\n\nforeign import exit_ :: forall p. Process p -> Atom -> Effect Unit\n"
-                    }
-                  ]
-                },
-                {
-                  "type": "directory",
                   "path": "${projectName}/src/${moduleName}/Supervisor",
                   "children": [
                     {

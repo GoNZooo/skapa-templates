@@ -1,0 +1,33 @@
+{
+  "variables": [
+    "module",
+    "path",
+    "server"
+  ],
+  "id": "simple-server",
+  "entities": [
+    {
+      "type": "directory",
+      "path": "${path}",
+      "children": [
+        {
+          "type": "directory",
+          "path": "${path}/${server}",
+          "children": [
+            {
+              "type": "file",
+              "path": "${path}/${server}/Types.purs",
+              "content": "module ${module}.Types\n  ( Message(..)\n  , Pid\n  , State\n  , Arguments\n  ) where\n\nimport SimpleGenServer (ServerPid)\n\ndata Message = NoOp\n\ntype State = { count :: Int }\n\ntype Arguments = { initialCount :: Int }\n\ntype Pid = ServerPid Message State\n"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "path": "${path}/${server}.purs",
+          "content": "module ${module}\n  ( startLink\n  , increment\n  , currentCount\n  ) where\n\nimport Prelude\n\nimport Data.Maybe (Maybe(..))\nimport Effect (Effect)\nimport Erl.Atom as Atom\nimport Erl.Process (Process, ProcessM)\nimport Pinto (RegistryName(..), StartLinkResult)\nimport ${module}.Types (Arguments, Message(..), State, Pid)\nimport SimpleGenServer (ReturnValue)\nimport SimpleGenServer as SimpleServer\nimport SimpleServer.Types (InitValue, ProcessReference(..))\n\nserverName :: RegistryName Pid\nserverName = \"${module}\" # Atom.atom # Local\n\nstartLink :: Arguments -> Effect (StartLinkResult (Process Message))\nstartLink arguments = do\n  SimpleServer.startLink arguments { name: Just serverName, init, handleInfo }\n\ninit :: Arguments -> ProcessM Message (InitValue State)\ninit { initialCount } = { count: initialCount } # SimpleServer.initOk # pure\n\nincrement :: Effect Unit\nincrement = SimpleServer.cast (NameReference serverName) \\state ->\n  pure $ SimpleServer.noReply $ state { count = state.count + 1 }\n\ncurrentCount :: Effect Int\ncurrentCount = SimpleServer.call (NameReference serverName) \\_from state ->\n  pure $ SimpleServer.reply state state.count\n\nhandleInfo :: Message -> State -> ProcessM Message (ReturnValue State)\nhandleInfo NoOp state = state # SimpleServer.noReply # pure\n"
+        }
+      ]
+    }
+  ],
+  "description": "A simple, lightweight gen_server"
+}

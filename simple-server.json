@@ -17,7 +17,7 @@
             {
               "type": "file",
               "path": "${path}/${server}/Types.purs",
-              "content": "module ${module}.Types\n  ( Message(..)\n  , Pid\n  , State\n  , Arguments\n  ) where\n\nimport SimpleGenServer (ServerPid)\n\ndata Message = NoOp\n\ntype State = { count :: Int }\n\ntype Arguments = { initialCount :: Int }\n\ntype Pid = ServerPid Message State\n"
+              "content": "module ${module}.Types\n  ( Message(..)\n  , Pid\n  , State\n  , Arguments\n  ) where\n\nimport SimpleServer.GenServer (ServerPid)\n\ndata Message = NoOp\n\ntype State = { count :: Int }\n\ntype Arguments = { initialCount :: Int }\n\ntype Pid = ServerPid Message State\n"
             }
           ]
         },
